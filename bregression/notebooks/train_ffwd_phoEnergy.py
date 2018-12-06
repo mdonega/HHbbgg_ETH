@@ -14,6 +14,9 @@ from sklearn.model_selection import train_test_split
 
 from optparse import OptionParser, make_option
 
+from numpy.random import seed #MDDB
+from tensorflow import set_random_seed #MDDB
+
 ##
 default_features = ['scRawEnergy',
                     'scEtaWidth',
@@ -58,7 +61,10 @@ parser = OptionParser(option_list=[
     make_option("--epochs",type='int',dest='epochs',default=20),
     make_option("--hparams",type='string',dest='hparams',default=None),
     make_option("--seed",type='int',dest='seed',default=98543),
+    make_option("--seed_tensorflow",type='int',dest='seed_tensorflow',default=None),
+    make_option("--save_best_only",type='string',dest="save_best_only",default="True"), 
 ])
+
 
 ## parse options
 (options, args) = parser.parse_args()
@@ -79,6 +85,14 @@ if options.hparams is not None:
     with open(options.hparams) as hf:
         hparams = json.loads(hf.read())        
     
+# Keras does get its source of randomness from the NumPy random number generator, 
+# so this must be seeded first and then the tensorflow one
+# Here set to the same seed for simplicity
+if options.seed_tensorflow is not None: 
+    seed(options.seed_tensorflow)             # numpy seed
+    set_random_seed(options.seed_tensorflow)  # tensorflow seed
+    print ("Setting numpy and keras random generator seed to ", options.seed_tensorflow)
+
 ## read data
 #columns = features + ['genPt']
 columns = features + ['genEnergy']
