@@ -11,7 +11,8 @@ from random import *
 #
 # Set here the GPUs you want to select
 # e.g. NGPU = [0, 1, 2, 5, 7] # list
-NGPU = [0, 1, 2, 3, 4, 5, 7] # list
+maxGPU=8
+NGPU = [0,1,2,3,4,5] # list
 
 #
 #--------------------------------------------------
@@ -55,6 +56,7 @@ def getGPUOccupancy(NGPU = [0,1,2,3,4,5,6,7]):
 #--------------------------------------------------
 #
 def printGPUOccupancy(dictGPU, dictJOBS):
+
     nj=0
     for i,j in dictGPU.items():        
         if (dictGPU[i] == 1):
@@ -133,7 +135,7 @@ totJobs = len(jobs)
 #
 print("Total #jobs = ",totJobs)
 
-listJobs=['']*len(NGPU) # numbered on the position of the GPU
+listJobs=['']*maxGPU # numbered on the position of the GPU
 
 # initial status of GPUs:
 if dbg:
