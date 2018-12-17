@@ -16,9 +16,13 @@ from keras import backend as K
 
 from keras.callbacks import TensorBoard, CSVLogger, ModelCheckpoint
 
+
+
+
 from sklearn.base import BaseEstimator
 
 from . import losses 
+
 
 # --------------------------------------------------------------------------------------------------
 class ConstOffsetLayer(Layer):
@@ -47,10 +51,11 @@ class FFWDRegression(BaseEstimator):
                  const_output_biases=None, 
                  optimizer="Adam", optimizer_params=dict(lr=1.e-03), # mse: 1e-3/5e-4
                  loss="RegularizedGaussNll",
-                 loss_params=dict(),# dict(reg_sigma=3.e-2),
+                 #loss_params=dict(reg_sigma=3.e-2),
+                 loss_params=dict(), 
                  monitor_dir=".",
                  save_best_only=True,
-                 valid_frac=None
+                 valid_frac=None,
     ):
         self.name = name
         self.input_shape = input_shape
@@ -151,7 +156,7 @@ class FFWDRegression(BaseEstimator):
             
         if docompile:
             optimizer = getattr(keras.optimizers,self.optimizer)(**self.optimizer_params)
-
+            
             self.model.compile(optimizer=optimizer,loss=loss,metrics=[losses.mse0,losses.mae0,
                                                                       losses.r2_score0])
         return self.model
