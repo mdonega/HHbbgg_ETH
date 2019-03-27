@@ -31,6 +31,47 @@ class HuberLoss(object):
         mask = K.cast(K.less(z,self.delta),K.floatx())
         return K.mean( 0.5*mask*K.square(z) + (1.-mask)*(self.delta*z - 0.5*self.delta**2) )
 
+
+# ---------------------------------------------------------------------------------------------------
+class HuberLossOneTail(object):
+    
+    def __init__(self,deltaL=1.):
+        self.deltaL    =     deltaL
+        self.mdeltaL   = -1.*deltaL
+        self.n_params = 1
+        self.__name__ = 'HuberLossOneTail'
+        
+    def __call__(self,y_true,y_pred):
+        z = y_true[:,0] - y_pred[:,0] #as huber loss but w/o the abs        
+        mask = K.cast(K.less(self.mdeltaL,z),K.floatx())
+        return K.mean( 0.5*mask*K.square(z) + (1.-mask)*(self.mdeltaL*z - 0.5*self.deltaL**2) )
+
+
+# ---------------------------------------------------------------------------------------------------
+class HuberLossTwoTails(object):
+    
+    def __init__(self,deltaL=1., deltaR=1.):
+        self.deltaL  =     deltaL
+        self.mdeltaL = -1.*deltaL
+        self.deltaR  =     deltaR
+        self.n_params = 2
+        self.__name__ = 'HuberLossTwoTails'
+        
+    def __call__(self,y_true,y_pred):
+        z = y_true[:,0] - y_pred[:,0] 
+
+        #  - deltaL < z < + deltaR
+        maskL  = K.less( self.mdeltaL, z) # boolean
+        maskR  = K.less( z,self.deltaR  ) # boolean
+        mask_b = maskL and maskR         # boolean
+        mask   = K.cast(mask_b , K.floatx())
+ 
+        # x < -deltaL
+        mask2  = K.cast(K.less(z,self.mdeltaL), K.floatx())     # this one to check if linear left or right
+
+        return K.mean( 0.5*mask*K.square(z) + (1.-mask)*( mask2 * (self.mdeltaL*z - 0.5*self.deltaL**2)  + (1.-mask2)*(self.deltaR*z - 0.5*self.deltaR**2) ) )
+
+
 # ---------------------------------------------------------------------------------------------------
 class QuantileLoss(object):
     def __init__(self,taus=[0.5,0.25,0.75],weights=[1.,1.2,0.9]):
