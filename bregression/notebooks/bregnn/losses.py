@@ -61,11 +61,13 @@ class HuberLossTwoTails(object):
         z = y_true[:,0] - y_pred[:,0] 
 
         #  - deltaL < z < + deltaR
-        maskL  = K.less( self.mdeltaL, z) # boolean
-        maskR  = K.less( z,self.deltaR  ) # boolean
-        mask_b = maskL and maskR         # boolean
-        mask   = K.cast(mask_b , K.floatx())
- 
+        maskL  = K.less( self.mdeltaL, z) # boolean tensor
+        maskR  = K.less( z,self.deltaR  ) # boolean tensor
+        A = K.cast(maskL, K.floatx())
+        B = K.cast(maskR, K.floatx())
+        A_and_B = A * B 
+        mask = K.cast(A_and_B, K.floatx())
+
         # x < -deltaL
         mask2  = K.cast(K.less(z,self.mdeltaL), K.floatx())     # this one to check if linear left or right
 

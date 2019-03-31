@@ -56,6 +56,7 @@ parser = OptionParser(option_list=[
     make_option("--normalize-target",action="store_true",dest="normalize_target",default=True),
     make_option("--no-normalize-target",action="store_false",dest="normalize_target"),
     make_option("--loss",type='string',dest="loss",default="mse"),
+    make_option("--loss_params",type='string',dest="loss_params"),
     make_option("--valid-frac",type='float',dest='valid_frac',default=0.05),
     make_option("--batch-size",type='int',dest='batch_size',default=1024),
     make_option("--epochs",type='int',dest='epochs',default=20),
@@ -135,7 +136,6 @@ if options.normalize_target:
 # split data
 X_train,X_valid,y_train,y_valid = train_test_split(X,y,test_size=options.valid_frac,random_state=options.seed)
 
-
 # sort out model parameters
 def get_kwargs(fn,**kwargs):
     params = set(fn.__code__.co_varnames[:fn.__code__.co_argcount]+tuple(kwargs.keys()))
@@ -145,6 +145,14 @@ def get_kwargs(fn,**kwargs):
         if par in hparams:
             kwargs[par] = hparams.pop(par)
     return kwargs
+
+
+import json
+if options.loss_params is not None:
+    json_acceptable_string = options.loss_params.replace("'", "\"")
+    options.loss_params = json.loads(json_acceptable_string)
+# if options.loss == 'huber' : loss_params=dict(delta = [1.])
+# init_kwargs = get_kwargs(ffwd.FFWDRegression.__init__,monitor_dir=options.out_dir ,loss_params=loss_params)
 
 init_kwargs = get_kwargs(ffwd.FFWDRegression.__init__,monitor_dir=options.out_dir)
 fit_kwargs = get_kwargs(ffwd.FFWDRegression.fit,batch_size=options.batch_size,epochs=options.epochs)
